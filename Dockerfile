@@ -1,5 +1,5 @@
-# Beware! This is a fat container. Why do we do this? Legacy Applications are not designed the microservice way.
-# docker build --rm --no-cache -t efa .
+# Beware! This is a fat container. Why do we do this? Legacy applications aren't designed the microservice way. Use kubernetes for healthiness of the service
+# docker build --rm --no-cache -t efa:latest .
 # docker kill efa && docker rm efa && docker run --privileged --name efa -v /sys/fs/cgroup:/sys/fs/cgroup:ro -p 8081:8081 -d  efa:latest
 # docker kill efa && docker rm efa && docker run --privileged --name efa -v /sys/fs/cgroup:/sys/fs/cgroup:ro -p 8080:8080 -ti efa:latest
 
@@ -9,13 +9,15 @@ MAINTAINER "Björn Dieding" <bjoern@xrow.de>
 
 ENV container=docker
 ENV TERM=dumb
+ENV lang en_US
 
+RUN yum -y install wget;\
+    mkdir /var/log/eFa;\
+    mkdir /usr/src/eFa;\
+    /usr/bin/wget -q -O /usr/src/eFa/build.bash -o /var/log/eFa/wget.log https://dl.eFa-project.org/build/4/build.bash ;\
+    chmod 700 /usr/src/eFa/build.bash
 
-# Fix for rename Overlay Issue
-RUN yum clean all;
-RUN yum -y update; yum clean all;
+RUN /usr/src/eFa/build.bash
 
-ADD build /build/
-RUN bash /build/build.bash
 # RUN systemctl enable ???
-EXPOSE 80 25 443
+# EXPOSE 80 25 443
